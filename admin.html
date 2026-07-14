@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bard's Canvas — Owner Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #131315;
+    --bg-soft: #1b1b1e;
+    --ink: #F4F1EA;
+    --ink-dim: #A9A7A3;
+    --orange: #FF5A1F;
+    --line: #2b2b2e;
+    --green: #4CAF7D;
+    --red: #e57373;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+  }
+  a{color:inherit;}
+  .tag{font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--orange);}
+
+  /* LOGIN VIEW */
+  #loginView{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .login-box{
+    width:100%; max-width:380px;
+    border:1px solid var(--line);
+    padding:40px 32px;
+    background:var(--bg-soft);
+  }
+  .login-box h1{
+    font-family:'Permanent Marker', cursive;
+    color:var(--orange);
+    font-size:28px;
+    margin:10px 0 4px;
+  }
+  .login-box p.sub{color:var(--ink-dim); font-size:14px; margin-bottom:28px;}
+  label{
+    font-family:'JetBrains Mono', monospace; font-size:11px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim);
+    display:block; margin-bottom:8px;
+  }
+  input{
+    width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink);
+    padding:12px 14px; font-family:'Space Grotesk', sans-serif; font-size:14px; border-radius:2px;
+    margin-bottom:18px;
+  }
+  input:focus{outline:none; border-color:var(--orange);}
+  .btn{
+    width:100%; background:var(--orange); color:#131315; border:none;
+    padding:14px; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:.04em;
+    cursor:pointer; border-radius:2px;
+  }
+  .btn:hover{background:var(--ink);}
+  .login-error{
+    display:none; color:var(--red); font-size:13px; margin-bottom:16px;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  /* DASHBOARD VIEW */
+  #dashView{display:none;}
+  header{
+    border-bottom:1px solid var(--line);
+    padding:20px 32px;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:12px;
+  }
+  header .brand{font-family:'Permanent Marker', cursive; color:var(--orange); font-size:20px;}
+  header .who{font-size:13px; color:var(--ink-dim);}
+  .logout-btn{
+    background:none; border:1px solid var(--line); color:var(--ink-dim);
+    padding:9px 16px; font-size:13px; cursor:pointer; border-radius:2px;
+  }
+  .logout-btn:hover{border-color:var(--orange); color:var(--orange);}
+
+  main{padding:32px; max-width:1100px; margin:0 auto;}
+  .stats{display:flex; gap:16px; margin-bottom:32px; flex-wrap:wrap;}
+  .stat-card{
+    border:1px solid var(--line); padding:18px 22px; min-width:130px;
+    background:var(--bg-soft);
+  }
+  .stat-card .num{font-size:28px; font-weight:700; color:var(--orange);}
+  .stat-card .label{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.06em; margin-top:4px;}
+
+  .req-list{display:flex; flex-direction:column; gap:14px;}
+  .req-card{
+    border:1px solid var(--line); background:var(--bg-soft); padding:22px;
+  }
+  .req-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  .req-top h3{font-size:18px;}
+  .req-top .meta{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-dim); margin-top:4px;}
+  .req-body{color:var(--ink-dim); font-size:14px; line-height:1.6; margin-bottom:16px;}
+  .req-tags{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .req-tags span{
+    font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase;
+    border:1px solid var(--line); padding:4px 10px; color:var(--ink-dim);
+  }
+  .req-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  select{
+    background:var(--bg); border:1px solid var(--line); color:var(--ink);
+    padding:9px 12px; font-family:'Space Grotesk', sans-serif; font-size:13px; border-radius:2px;
+  }
+  .status-badge{
+    font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase;
+    padding:5px 12px; border-radius:2px; font-weight:600;
+  }
+  .status-new{background:rgba(255,90,31,.15); color:var(--orange);}
+  .status-quoted{background:rgba(255,193,7,.15); color:#ffc107;}
+  .status-scheduled{background:rgba(76,175,125,.15); color:var(--green);}
+  .status-declined{background:rgba(229,115,115,.15); color:var(--red);}
+
+  .empty{text-align:center; padding:80px 20px; color:var(--ink-dim);}
+  .loading{text-align:center; padding:60px 20px; color:var(--ink-dim); font-family:'JetBrains Mono', monospace; font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView">
+  <div class="login-box">
+    <span class="tag">Owner Access</span>
+    <h1>Bard's Canvas</h1>
+    <p class="sub">Log in to review commission requests.</p>
+    <div class="login-error" id="loginError">Incorrect email or password.</div>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" required>
+      <label for="password">Password</label>
+      <input type="password" id="password" required>
+      <button type="submit" class="btn" id="loginBtn">Log In</button>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashView">
+  <header>
+    <span class="brand">strt. Bard &mdash; Dashboard</span>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <span class="who" id="whoami"></span>
+      <button class="logout-btn" id="logoutBtn">Log Out</button>
+    </div>
+  </header>
+  <main>
+    <div class="stats" id="stats"></div>
+    <div class="req-list" id="reqList">
+      <div class="loading">Loading requests...</div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://flrqnawocsaidiysarkk.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_oWHlVpO75TdMHb4eV2Gbog_Vc_VxduI';
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const loginView = document.getElementById('loginView');
+  const dashView = document.getElementById('dashView');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+  const loginBtn = document.getElementById('loginBtn');
+
+  async function checkSession(){
+    const { data } = await db.auth.getSession();
+    if (data.session) {
+      showDashboard(data.session.user);
+    }
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginError.style.display = 'none';
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
+
+    const { data, error } = await db.auth.signInWithPassword({
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value
+    });
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Log In';
+
+    if (error) {
+      loginError.style.display = 'block';
+    } else {
+      showDashboard(data.user);
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await db.auth.signOut();
+    location.reload();
+  });
+
+  function showDashboard(user){
+    loginView.style.display = 'none';
+    dashView.style.display = 'block';
+    document.getElementById('whoami').textContent = user.email;
+    loadRequests();
+  }
+
+  async function loadRequests(){
+    const listEl = document.getElementById('reqList');
+    const statsEl = document.getElementById('stats');
+    const { data, error } = await db.from('commissions').select('*').order('created_at', { ascending: false });
+
+    if (error) {
+      listEl.innerHTML = '<div class="empty">Could not load requests. Try refreshing.</div>';
+      console.error(error);
+      return;
+    }
+
+    if (!data.length) {
+      statsEl.innerHTML = '';
+      listEl.innerHTML = '<div class="empty">No commission requests yet.</div>';
+      return;
+    }
+
+    const counts = { new:0, quoted:0, scheduled:0, declined:0 };
+    data.forEach(r => { counts[r.status] = (counts[r.status]||0) + 1; });
+
+    statsEl.innerHTML = `
+      <div class="stat-card"><div class="num">${data.length}</div><div class="label">Total</div></div>
+      <div class="stat-card"><div class="num">${counts.new||0}</div><div class="label">New</div></div>
+      <div class="stat-card"><div class="num">${counts.quoted||0}</div><div class="label">Quoted</div></div>
+      <div class="stat-card"><div class="num">${counts.scheduled||0}</div><div class="label">Scheduled</div></div>
+    `;
+
+    listEl.innerHTML = data.map(r => `
+      <div class="req-card" data-id="${r.id}">
+        <div class="req-top">
+          <div>
+            <h3>${escapeHtml(r.name)}</h3>
+            <div class="meta">${escapeHtml(r.contact)} &middot; ${new Date(r.created_at).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'})}</div>
+          </div>
+          <span class="status-badge status-${r.status}">${r.status}</span>
+        </div>
+        <div class="req-tags">
+          <span>${escapeHtml(r.project_type || 'N/A')}</span>
+          <span>${escapeHtml(r.budget || 'N/A')}</span>
+        </div>
+        <div class="req-body">${escapeHtml(r.brief || 'No additional details provided.')}</div>
+        <div class="req-actions">
+          <label style="margin:0; display:inline;">Update status:</label>
+          <select class="status-select">
+            <option value="new" ${r.status==='new'?'selected':''}>New</option>
+            <option value="quoted" ${r.status==='quoted'?'selected':''}>Quoted</option>
+            <option value="scheduled" ${r.status==='scheduled'?'selected':''}>Scheduled</option>
+            <option value="declined" ${r.status==='declined'?'selected':''}>Declined</option>
+          </select>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.status-select').forEach(sel => {
+      sel.addEventListener('change', async (e) => {
+        const card = e.target.closest('.req-card');
+        const id = card.dataset.id;
+        const newStatus = e.target.value;
+        await db.from('commissions').update({ status: newStatus }).eq('id', id);
+        loadRequests();
+      });
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  checkSession();
+</script>
+</body>
+</html>
